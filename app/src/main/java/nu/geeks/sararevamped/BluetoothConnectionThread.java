@@ -43,10 +43,10 @@ public class BluetoothConnectionThread extends Thread {
             Intent bt = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             activity.startActivityForResult(bt, REQUESTCODE);
         }
-        while (!bluetoothStartedOnPhone) {
+       // while (!bluetoothStartedOnPhone) {
             //wait on OK
             //TODO - this might be an error
-        }
+        // }
 
 
         Set<BluetoothDevice> pariedDevices = bluetoothAdapter.getBondedDevices();
