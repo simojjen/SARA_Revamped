@@ -13,17 +13,17 @@ import android.widget.TextView;
 public class TouchThread extends Thread {
 
     RelativeLayout root;
-    TextView debug;
+
 
     Display display;
     int screenHeight;
     char sendValue;
 
 
-    public TouchThread(RelativeLayout root, Display display, TextView debug){
+    public TouchThread(RelativeLayout root, Display display){
         this.root = root;
         this.display = display;
-        this.debug = debug;
+
 
         sendValue = 0;
     }
@@ -53,7 +53,7 @@ public class TouchThread extends Thread {
 
                         else sendValue = (char) value;
 
-                    return false;
+                    return true;
                 }
             });
 

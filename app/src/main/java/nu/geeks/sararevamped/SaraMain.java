@@ -15,14 +15,11 @@ import android.widget.TextView;
 public class SaraMain extends Activity {
 
     private RelativeLayout root;
-    private TextView debug;
-    private int screenHeight;
-    private BluetoothAdapter bluetoothAdapter;
-    private BluetoothSocket bluetoothSocket;
     private TouchThread touchThread;
     private SensorThread sensorThread;
     private BluetoothConnectionThread bluetoothConnectionThread;
     private CollectData collectData;
+    private UIThread uiThread;
 
     private final int REQUESTCODE = 1234;
 
@@ -32,10 +29,9 @@ public class SaraMain extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sara_main);
 
-        root = ( RelativeLayout ) findViewById( R.id.root );
-        debug= ( TextView ) findViewById( R.id.DebugText );
+        uiThread = new UIThread();
 
-        touchThread = new TouchThread(root, getWindowManager().getDefaultDisplay(), debug);
+        touchThread = new TouchThread(root, getWindowManager().getDefaultDisplay());
         touchThread.start();
 
         SensorManager manager = (SensorManager)getSystemService( SENSOR_SERVICE );
@@ -77,6 +73,40 @@ public class SaraMain extends Activity {
         }
 
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private class UIThread extends Thread{
+
+        //TODO - update UI in this thread.
+
+
+        private UIThread() {
+
+            root = ( RelativeLayout ) findViewById( R.id.root );
+
+
+            /*
+            cretate all views.
+
+
+             */
+        }
+
+        @Override
+        public void run() {
+
+
+            /*
+            while(1)
+                get current rotation from sensorThread
+                get current data from TouchThread
+                update graphics on screen.
+
+
+             */
+
+
+        }
     }
 
     private class CollectData extends Thread{
