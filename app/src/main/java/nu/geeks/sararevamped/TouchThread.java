@@ -12,46 +12,46 @@ import android.widget.TextView;
  */
 public class TouchThread extends Thread {
 
+    int DPI;
+    float yStartDP;
+    float pxHalfButtonSize;
+
     RelativeLayout root;
 
-
-    Display display;
-    int screenHeight;
-    char sendValue;
+    float sendValue;
 
 
-    public TouchThread(RelativeLayout root, Display display){
+    public TouchThread(RelativeLayout root, int DPI, float yStartDP){
         this.root = root;
-        this.display = display;
-
-
-        sendValue = 0;
+        this.DPI = DPI;
+        this.yStartDP = yStartDP;
+        pxHalfButtonSize = 50 * (DPI / 160);
+        sendValue = 185;
     }
 
-    public char getThrottleValue(){
+    public float getThrottleValue(){
         return sendValue;
     }
 
     @Override
     public void run() {
-                Point size = new Point();
-                display.getSize(size);
-                screenHeight = size.y;
+
 
                 root.setOnTouchListener(new View.OnTouchListener() {
                     @Override
                 public boolean onTouch(View v, MotionEvent event) {
 
 
-                    float screenPercent = (event.getY() / screenHeight) * 100f;
 
-                        float value = ((70-screenPercent) * 1.5f);
+                    sendValue = (160 * event.getY()) / DPI;
 
-                        if ( value < 0) sendValue = 0;
+                        // px = dp * (dpi / 160)
+                        //px * 160 = dp * dpi
+                        //dp = (px * 160) / dpi
 
-                        else if( value > 100) sendValue = 100;
-
-                        else sendValue = (char) value;
+                        if(event.getAction() == MotionEvent.ACTION_UP){
+                            sendValue = 185;
+                        }
 
                     return true;
                 }
@@ -60,4 +60,5 @@ public class TouchThread extends Thread {
 
 
     }
+
 }

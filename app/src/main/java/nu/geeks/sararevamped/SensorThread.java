@@ -11,10 +11,10 @@ import android.hardware.SensorManager;
  */
 public class SensorThread extends Thread implements SensorEventListener{
 
-    SensorManager manager;
-    Context context;
-
-    char sendValue;
+    private SensorManager manager;
+    private Context context;
+    private float rawValue;
+    private char sendValue;
 
     public SensorThread(SensorManager manager, Context context) {
         this.manager = manager;
@@ -31,13 +31,19 @@ public class SensorThread extends Thread implements SensorEventListener{
     @Override
     public void onSensorChanged(SensorEvent event) {
         //this is math, dont question it
-        float ut = event.values[1]*2f;
+        rawValue = event.values[1];
+        float ut = rawValue*2f;
         sendValue = (char) (100-(ut*1.6f));
+
 
     }
     public char getSensorValue(){
     return sendValue;
 
+    }
+
+    public float getRaw(){
+        return rawValue;
     }
     @Override
     public void onAccuracyChanged(Sensor sensor, int accuracy) {

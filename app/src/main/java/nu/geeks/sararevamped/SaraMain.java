@@ -6,20 +6,39 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.os.Handler;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 public class SaraMain extends Activity {
 
-    private RelativeLayout root;
+    private static final String TAG = "SaraMain::: ";
+
+    private int DPI;
+
+    private Handler handler;
+
     private TouchThread touchThread;
     private SensorThread sensorThread;
     private BluetoothConnectionThread bluetoothConnectionThread;
     private CollectData collectData;
-    private UIThread uiThread;
+
+    private Thread uiThread;
+
+
+    private RelativeLayout                  root;
+    private ImageView                       ivPhone, ivGasPedal;
+    private float                           yGasStartPX, yGasPedalUdpdate, yGasStartDP;
+    private TextView debug;
 
     private final int REQUESTCODE = 1234;
 
@@ -29,26 +48,101 @@ public class SaraMain extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sara_main);
 
-        uiThread = new UIThread();
+        handler = new Handler();
 
-        touchThread = new TouchThread(root, getWindowManager().getDefaultDisplay());
-        touchThread.start();
+
+        root = (RelativeLayout) findViewById( R.id.root );
+        ivPhone = (ImageView) findViewById( R.id.ivPhoneIcon );
+        ivGasPedal = (ImageView) findViewById( R.id.ivGasPedal );
+        debug = (TextView) findViewById(R.id.debug);
+
+        DisplayMetrics dpm = getResources().getDisplayMetrics();
+        DPI = dpm.densityDpi;
+
+
+        touchThread = new TouchThread(root, DPI, yGasStartDP);
+        //touchThread.start();
 
         SensorManager manager = (SensorManager)getSystemService( SENSOR_SERVICE );
         sensorThread = new SensorThread( manager, getApplicationContext( ) );
-        sensorThread.start();
+        //sensorThread.start();
 
         bluetoothConnectionThread = new BluetoothConnectionThread(this);
-        bluetoothConnectionThread.start();
+        //bluetoothConnectionThread.start();
 
         collectData = new CollectData();
-        collectData.start();
+        //collectData.start();
+
+        uiThread = new Thread(new UIRunnable());
+
 
 
     }
 
+    private void updateGraphics(){
 
 
+        if(touchThread != null){
+
+            float val = touchThread.getThrottleValue();
+            final int throttleValue = (int) (((80 - val * 0.162f)-30)*1.3f);
+            final float px = (val - ( 25 * (DPI) / 160)) * (DPI / 160);
+
+
+            debug.post(new Runnable(){
+               public void run(){
+                   debug.setText("" + throttleValue);
+                   ivGasPedal.setY(px);
+               }
+            });
+
+
+
+
+
+            // px = dp * (dpi / 160)
+            //px * 160 = dp * dpi
+            //dp = (px * 160) / dpi
+
+        }
+        if(sensorThread != null){
+
+            final float rawSensorValue = sensorThread.getRaw();
+
+            ivPhone.post(new Runnable() {
+                @Override
+                public void run() {
+                    ivPhone.setRotation(-rawSensorValue*9);
+                }
+            });
+
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        touchThread.start();
+        sensorThread.start();
+        bluetoothConnectionThread.start();
+        collectData.start();
+        uiThread.start();
+
+    }
+
+    @Override
+    protected void onPause() {
+
+        collectData.interrupt();
+        bluetoothConnectionThread.interrupt();
+        sensorThread.interrupt();
+        touchThread.interrupt();
+        uiThread.interrupt();
+
+        super.onPause();
+
+    }
 
 
     @Override
@@ -68,46 +162,23 @@ public class SaraMain extends Activity {
         if(requestCode == REQUESTCODE){
             if(resultCode == RESULT_OK){
                 //todo - skriva ut bluetooth i mobilen om vi har connection
-                bluetoothConnectionThread.bluetoothStartedOnPhone = true;
+                Log.d(TAG, "ResultCode OK from bluetooth");
+                bluetoothConnectionThread.bluetoothStartedOnPhone = true; //Not used at this time.
             }
         }
 
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private class UIThread extends Thread{
-
-        //TODO - update UI in this thread.
-
-
-        private UIThread() {
-
-            root = ( RelativeLayout ) findViewById( R.id.root );
-
-
-            /*
-            cretate all views.
-
-
-             */
-        }
-
+    private class UIRunnable implements Runnable{
         @Override
         public void run() {
-
-
-            /*
-            while(1)
-                get current rotation from sensorThread
-                get current data from TouchThread
-                update graphics on screen.
-
-
-             */
-
-
+            while( true ) {
+                updateGraphics();
+            }
         }
     }
+
 
     private class CollectData extends Thread{
 
@@ -126,18 +197,20 @@ public class SaraMain extends Activity {
         @Override
         public void run() {
 
-            while ( true ) {
-                if(sensorThread.getSensorValue() != steering) {
-                    steering = sensorThread.getSensorValue();
-                    bluetoothConnectionThread.write ( STEERING , ( byte ) steering );
-                }
+            while ( !this.isInterrupted() ) {
 
-                if(touchThread.getThrottleValue() != throttle) {
-                    throttle = touchThread.getThrottleValue();
-                    bluetoothConnectionThread.write( THROTTLE , ( byte ) throttle );
+                if (sensorThread.getSensorValue() != steering) {
+                    steering = sensorThread.getSensorValue();
+                    bluetoothConnectionThread.write(STEERING, (byte) steering);
+                }else
+
+                if (touchThread.getThrottleValue() != throttle) {
+                    //throttle = touchThread.getThrottleValue();
+                    //bluetoothConnectionThread.write( THROTTLE , ( byte ) throttle );
 
                 }
             }
+
         }
     }
 }
