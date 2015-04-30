@@ -29,6 +29,7 @@ public class BluetoothConnectionThread extends Thread {
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private final InputStream inStream;
     private final OutputStream outStream;
+    private boolean bluetoothConnectionWorking;
 
     public boolean sendAllowed;
 
@@ -103,6 +104,14 @@ public class BluetoothConnectionThread extends Thread {
         //TODO - constructor
     }
 
+    public void setSendAllowed(boolean sendAllowed){
+        this.sendAllowed = sendAllowed;
+    }
+
+    public boolean isBluetoothConnectionWorking(){
+        return bluetoothConnectionWorking;
+    }
+
     @Override
     public void run() {
         //TODO - read bluetooth?
@@ -123,11 +132,11 @@ public class BluetoothConnectionThread extends Thread {
 
             try {
                 outStream.write(msgBuffer);                //write bytes over BT connection via outstream
-
+                bluetoothConnectionWorking = true;
                 //mmOutStream.flush();
 
             } catch (IOException e) {
-
+                bluetoothConnectionWorking = false;
             }
         }
     }

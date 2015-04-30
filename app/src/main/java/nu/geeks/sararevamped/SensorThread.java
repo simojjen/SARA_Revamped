@@ -37,6 +37,7 @@ public class SensorThread extends Thread implements SensorEventListener{
 
 
     }
+
     public char getSensorValue(){
     return sendValue;
 
