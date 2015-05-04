@@ -119,6 +119,7 @@ public class BluetoothConnectionThread extends Thread {
     }
 
     public void kill(){
+
         sendAllowed = false;
         try {
             inStream.close();

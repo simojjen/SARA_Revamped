@@ -23,7 +23,7 @@ import android.widget.Toast;
 public class SaraMain extends Activity {
 
 
-    public static boolean DEBUG = false;
+    public static boolean DEBUG = true;
 
     private static final String TAG = "SaraMain::: ";
 
@@ -41,6 +41,8 @@ public class SaraMain extends Activity {
     private ImageView ivPhone, ivGasPedal;
     private float yGasStartPX, yGasPedalUdpdate, yGasStartDP;
     private TextView debug, tConnected;
+
+    private String debugText = "";
 
     private final int REQUESTCODE = 1234;
 
@@ -117,8 +119,9 @@ public class SaraMain extends Activity {
 
 
             debug.post(new Runnable(){
-               public void run(){
-                   debug.setText("" + throttleValue);
+
+                public void run(){
+                   debug.setText("" + debugText);
                    ivGasPedal.setY(px);
                }
 
@@ -200,8 +203,6 @@ public class SaraMain extends Activity {
             public void onTick(long millisUntilFinished) {
                 updateGraphics();
                 collectData();
-
-
             }
 
             @Override
@@ -244,6 +245,8 @@ public class SaraMain extends Activity {
 
     public void onConnectSelected() {
 
+            //TODO - snygga till knappen, antingen lägga till en till för disconnect eller ba slasha
+
             bluetoothConnectionThread.setSendAllowed(false);
 
             bluetoothConnectionThread.interrupt();
@@ -259,7 +262,9 @@ public class SaraMain extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == REQUESTCODE){
             if(resultCode == RESULT_OK){
+
                 //todo - skriva ut bluetooth i mobilen om vi har connection
+
                 Log.d(TAG, "ResultCode OK from bluetooth");
                 //bluetoothConnectionThread.bluetoothStartedOnPhone = true; //Not used at this time.
             }else{
@@ -289,10 +294,15 @@ public class SaraMain extends Activity {
             bluetoothConnectionThread.write(STEERING, (byte) steering);
         } else if (touchThread.getThrottleValue() != throttle) {
 
-            throttle = (char) (114.24f - 0.38556f * touchThread.getThrottleValue());
-            if(throttle >= 100) throttle = 100;
-            if(throttle <= 0) throttle = 0;
+            int temp = (int) (114.24f - 0.38556f * touchThread.getThrottleValue());
+
+
+            if(temp >= 100) throttle = 100;
+            else if(temp <= 0) throttle = 0;
+            else throttle = (char) temp;
+
             bluetoothConnectionThread.write(THROTTLE, (byte) throttle);
+            debugText = "" + (int) throttle;
 
         }
     }
