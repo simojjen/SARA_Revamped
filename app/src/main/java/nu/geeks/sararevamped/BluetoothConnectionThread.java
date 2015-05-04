@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -22,10 +23,10 @@ public class BluetoothConnectionThread extends Thread {
     private Activity activity;
     private BluetoothSocket btSocket;
     private BluetoothAdapter bluetoothAdapter;
-    public boolean bluetoothStartedOnPhone = false;
     private static String HC06Adress;
     private BluetoothDevice hc06;
     private final int REQUESTCODE = 1234;
+    private final String TAG = "btConThread";
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     private final InputStream inStream;
     private final OutputStream outStream;
@@ -117,6 +118,36 @@ public class BluetoothConnectionThread extends Thread {
         //TODO - read bluetooth?
     }
 
+    public void kill(){
+        sendAllowed = false;
+        try {
+            inStream.close();
+            Log.d(TAG, "inputStrem DID close");
+        } catch (IOException e) {
+            Log.d(TAG, "inputStrem didn't close");
+            e.printStackTrace();
+        }
+        try {
+            outStream.close();
+            Log.d(TAG, "outputStrem DID close");
+        } catch (IOException e) {
+            Log.d(TAG, "outputStrem didn't close");
+            e.printStackTrace();
+        }
+        try {
+            btSocket.close();
+            Log.d(TAG, "socket DID close");
+        } catch (IOException e) {
+            Log.d(TAG, "socket didn't close");
+            e.printStackTrace();
+        }
+
+        //btSocket = null;
+        //bluetoothAdapter = null;
+
+
+    }
+
 
     public void write(byte key, byte value) {
 
@@ -133,7 +164,8 @@ public class BluetoothConnectionThread extends Thread {
             try {
                 outStream.write(msgBuffer);                //write bytes over BT connection via outstream
                 bluetoothConnectionWorking = true;
-                //mmOutStream.flush();
+                outStream.flush();
+
 
             } catch (IOException e) {
                 bluetoothConnectionWorking = false;

@@ -9,7 +9,7 @@ import android.hardware.SensorManager;
 /**
  * Created by Simon on 4/28/2015.
  */
-public class SensorThread extends Thread implements SensorEventListener{
+public class SensorThread implements SensorEventListener{
 
     private SensorManager manager;
     private Context context;
@@ -20,13 +20,11 @@ public class SensorThread extends Thread implements SensorEventListener{
         this.manager = manager;
         this.context = context;
         sendValue = 0;
+        manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), manager.SENSOR_DELAY_UI);
+
     }
 
-    @Override
-    public void run() {
 
-       manager.registerListener(this, manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), manager.SENSOR_DELAY_UI);
-    }
 
     @Override
     public void onSensorChanged(SensorEvent event) {
