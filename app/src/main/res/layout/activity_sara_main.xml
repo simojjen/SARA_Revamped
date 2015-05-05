@@ -5,7 +5,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".SaraMain"
     android:id="@+id/root"
-    android:background="@drawable/bg">
+    android:background="@drawable/newbg">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -21,7 +21,9 @@
 
     <RelativeLayout
         android:layout_width="fill_parent"
-        android:layout_height="fill_parent">
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true">
 
         <ImageView
             android:layout_width="70dp"
@@ -59,9 +61,10 @@
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="NOT CONNECTED"
             android:id="@+id/tConnected"
-            android:layout_alignParentBottom="true"
+            android:textColor="#ffff001f"
+            android:layout_above="@+id/tRecieved"
             android:layout_alignParentStart="true"
-            android:textColor="#ffff001f" />
+            android:textSize="20dp" />
 
         <Button
             style="?android:attr/buttonStyleSmall"
@@ -76,11 +79,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="recieved"
+            android:text="100%"
             android:id="@+id/tRecieved"
-            android:layout_alignBottom="@+id/bMenu"
-            android:layout_centerHorizontal="true"
-            android:textColor="#ffffff" />
+            android:textColor="#ffffff"
+            android:textSize="20dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="170dp" />
+
+        <ImageView
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:id="@+id/imVisare"
+            android:background="@drawable/visare"
+            android:layout_marginLeft="220dp"
+            android:layout_alignParentStart="true"
+            android:layout_marginTop="240dp" />
+
     </RelativeLayout>
 
 </RelativeLayout>

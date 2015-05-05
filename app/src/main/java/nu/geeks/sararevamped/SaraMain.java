@@ -3,6 +3,7 @@ package nu.geeks.sararevamped;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -29,17 +30,16 @@ public class SaraMain extends Activity {
 
     private int DPI;
 
-    private Handler handler;
 
     private TouchThread touchThread;
     private SensorThread sensorThread;
     private BluetoothConnectionThread bluetoothConnectionThread;
 
+    private Typeface font;
 
     private Button bMenu;
     private RelativeLayout root;
     private ImageView ivPhone, ivGasPedal;
-    private float yGasStartPX, yGasPedalUdpdate, yGasStartDP;
     private TextView debug, tConnected, tReceived;
 
     private String debugText = "";
@@ -61,9 +61,6 @@ public class SaraMain extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sara_main);
 
-        handler = new Handler();
-
-
         root = (RelativeLayout) findViewById(R.id.root);
         ivPhone = (ImageView) findViewById(R.id.ivPhoneIcon);
         ivGasPedal = (ImageView) findViewById(R.id.ivGasPedal);
@@ -71,6 +68,10 @@ public class SaraMain extends Activity {
         tConnected = (TextView) findViewById(R.id.tConnected);
         bMenu = (Button) findViewById(R.id.bMenu);
         tReceived = (TextView) findViewById(R.id.tRecieved);
+
+        font = Typeface.createFromAsset(getAssets(), "dispfont.ttf");
+        tReceived.setTypeface(font);
+        tConnected.setTypeface(font);
 
         DisplayMetrics dpm = getResources().getDisplayMetrics();
         DPI = dpm.densityDpi;
@@ -112,9 +113,32 @@ public class SaraMain extends Activity {
 
     private void updateBatteryStatus(){
         if(bluetoothConnectionThread.isBluetoothConnectionWorking()) {
-            //Float readValue = Float.parseFloat(bluetoothConnectionThread.getInput()) * 20f;
+           // Float readValue = (Float.parseFloat(bluetoothConnectionThread.getInput()) / 1023) * 5;
 
-            tReceived.setText("Power at " +  bluetoothConnectionThread.getInput() + "  V");
+            String s = bluetoothConnectionThread.getInput();
+            StringBuilder sb = new StringBuilder();
+
+            boolean start = false;
+            for(char c : s.toCharArray()){
+                if(c == '#') start = true;
+                if(start){
+                    if(c == '@') break;
+                    if(c != '#') sb.append(c);
+                }
+            }
+            float batteryStatus = 0;
+
+            try {
+                batteryStatus = Float.parseFloat(sb.toString()) * 20.0f;
+
+                tReceived.setText(batteryStatus + " %");
+            }catch (NumberFormatException nb){
+
+                      Log.d(TAG, "couldn't parse float.");
+
+            }
+
+
         }
     }
 
@@ -186,16 +210,12 @@ public class SaraMain extends Activity {
         super.onResume();
 
 
-        touchThread = new TouchThread(root, DPI, yGasStartDP);
+        touchThread = new TouchThread(root, DPI);
 
         SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorThread = new SensorThread(manager, getApplicationContext());
 
-        bluetoothConnectionThread = new BluetoothConnectionThread(this);
-
-        if (!bluetoothConnectionThread.isAlive()) {
-           bluetoothConnectionThread.start();
-        }
+        restartBluetooth();
 
         CountDownTimer mainLoopTimer = new CountDownTimer(1000, 1) {
             @Override
@@ -252,13 +272,21 @@ public class SaraMain extends Activity {
 
         //TODO - snygga till knappen, antingen lägga till en till för disconnect eller ba slasha
 
-        bluetoothConnectionThread.setSendAllowed(false);
+        restartBluetooth();
+    }
 
-        bluetoothConnectionThread.interrupt();
-        bluetoothConnectionThread.kill();
+    public void restartBluetooth(){
+
+        if(bluetoothConnectionThread != null) {
+            bluetoothConnectionThread.setSendAllowed(false);
+
+            bluetoothConnectionThread.interrupt();
+            bluetoothConnectionThread.kill();
+        }
         bluetoothConnectionThread = null;
 
         bluetoothConnectionThread = new BluetoothConnectionThread(this);
+        if(!bluetoothConnectionThread.isAlive()) bluetoothConnectionThread.start();
 
     }
 

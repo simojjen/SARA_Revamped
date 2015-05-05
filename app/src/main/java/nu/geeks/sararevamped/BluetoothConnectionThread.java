@@ -126,11 +126,16 @@ public class BluetoothConnectionThread extends Thread {
         while (true) {
             try {
                 bytes = inStream.read(buffer);            //read bytes from input buffer
+
                 String readMessage = new String(buffer, 0, bytes);
+
                 // Send the obtained bytes to the UI Activity via handler
+
                 inputString = readMessage;
+
                 Log.d(TAG, inputString);
             } catch (IOException e) {
+                Log.d(TAG, "breaked");
                 break;
             }
         }
@@ -141,7 +146,7 @@ public class BluetoothConnectionThread extends Thread {
     }
 
     public void kill(){
-
+        bluetoothConnectionWorking = false;
         sendAllowed = false;
         try {
             inStream.close();
