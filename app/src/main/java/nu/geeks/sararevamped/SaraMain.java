@@ -110,6 +110,14 @@ public class SaraMain extends Activity {
         });
     }
 
+    private void updateBatteryStatus(){
+        if(bluetoothConnectionThread.isBluetoothConnectionWorking()) {
+            //Float readValue = Float.parseFloat(bluetoothConnectionThread.getInput()) * 20f;
+
+            tReceived.setText("Power at " +  bluetoothConnectionThread.getInput() + "  V");
+        }
+    }
+
     private void updateGraphics() {
         if (touchThread != null) {
 
@@ -121,11 +129,7 @@ public class SaraMain extends Activity {
             debug.setText("" + debugText);
             ivGasPedal.setY(px);
 
-            if(bluetoothConnectionThread.isBluetoothConnectionWorking()) {
-              Float readValue = Float.parseFloat(bluetoothConnectionThread.getInput()) * 20f;
 
-                tReceived.setText("Power at " +  bluetoothConnectionThread.getInput() + "  V");
-            }
 
             if (bluetoothConnectionThread.isBluetoothConnectionWorking()) {
                 tConnected.setText("Connected");
@@ -201,6 +205,7 @@ public class SaraMain extends Activity {
 
             @Override
             public void onFinish() {
+                updateBatteryStatus();
                 start();
             }
         }.start();
