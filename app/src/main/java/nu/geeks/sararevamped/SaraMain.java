@@ -40,7 +40,7 @@ public class SaraMain extends Activity {
     private RelativeLayout root;
     private ImageView ivPhone, ivGasPedal;
     private float yGasStartPX, yGasPedalUdpdate, yGasStartDP;
-    private TextView debug, tConnected;
+    private TextView debug, tConnected, tReceived;
 
     private String debugText = "";
 
@@ -64,18 +64,18 @@ public class SaraMain extends Activity {
         handler = new Handler();
 
 
-        root = ( RelativeLayout ) findViewById( R.id.root );
-        ivPhone = ( ImageView ) findViewById( R.id.ivPhoneIcon );
-        ivGasPedal = ( ImageView ) findViewById( R.id.ivGasPedal );
-        debug = ( TextView ) findViewById( R.id.debug );
-        tConnected = ( TextView ) findViewById( R.id.tConnected );
-        bMenu = ( Button ) findViewById( R.id.bMenu );
-
+        root = (RelativeLayout) findViewById(R.id.root);
+        ivPhone = (ImageView) findViewById(R.id.ivPhoneIcon);
+        ivGasPedal = (ImageView) findViewById(R.id.ivGasPedal);
+        debug = (TextView) findViewById(R.id.debug);
+        tConnected = (TextView) findViewById(R.id.tConnected);
+        bMenu = (Button) findViewById(R.id.bMenu);
+        tReceived = (TextView) findViewById(R.id.tRecieved);
 
         DisplayMetrics dpm = getResources().getDisplayMetrics();
         DPI = dpm.densityDpi;
 
-        if(!DEBUG) debug.setVisibility(View.INVISIBLE);
+        if (!DEBUG) debug.setVisibility(View.INVISIBLE);
 
 
         handleMenuButton();
@@ -96,7 +96,7 @@ public class SaraMain extends Activity {
                     public boolean onMenuItemClick(MenuItem item) {
 
 
-                        if(item.getItemId() == R.id.action_settings){
+                        if (item.getItemId() == R.id.action_settings) {
 
                             onConnectSelected();
 
@@ -110,99 +110,93 @@ public class SaraMain extends Activity {
         });
     }
 
-    private void updateGraphics(){
-        if(touchThread != null){
+    private void updateGraphics() {
+        if (touchThread != null) {
 
             float val = touchThread.getThrottleValue();
-            final int throttleValue = (int) (114.24f -  0.38556f * val);
-            final float px = (val - ( 25 * (DPI) / 160)) * (DPI / 160);
+            final int throttleValue = (int) (114.24f - 0.38556f * val);
+            final float px = (val - (25 * (DPI) / 160)) * (DPI / 160);
 
 
-            debug.post(new Runnable(){
+            debug.setText("" + debugText);
+            ivGasPedal.setY(px);
 
-                public void run(){
-                   debug.setText("" + debugText);
-                   ivGasPedal.setY(px);
-               }
+            if(bluetoothConnectionThread.isBluetoothConnectionWorking()) {
+              Float readValue = Float.parseFloat(bluetoothConnectionThread.getInput()) * 20f;
 
-            });
+                tReceived.setText("Power at " +  bluetoothConnectionThread.getInput() + "  V");
+            }
 
-
-            tConnected.post(new Runnable() {
-                @Override
-                public void run() {
-                    if(bluetoothConnectionThread.isBluetoothConnectionWorking()){
-                        tConnected.setText("Connected");
-                        tConnected.setTextColor(Color.GREEN);
-                    }else{
-                        tConnected.setText("Not connected");
-                        tConnected.setTextColor(Color.RED);
-                    }
-                }
-            });
-
-            // px = dp * (dpi / 160)
-            //px * 160 = dp * dpi
-            //dp = (px * 160) / dpi
-
+            if (bluetoothConnectionThread.isBluetoothConnectionWorking()) {
+                tConnected.setText("Connected");
+                tConnected.setTextColor(Color.GREEN);
+            } else {
+                tConnected.setText("Not connected");
+                tConnected.setTextColor(Color.RED);
+            }
         }
-        if(sensorThread != null){
 
-            final float rawSensorValue = sensorThread.getRaw();
 
-            ivPhone.post(new Runnable() {
+        // px = dp * (dpi / 160)
+        //px * 160 = dp * dpi
+        //dp = (px * 160) / dpi
 
-                @Override
-                public void run() {
-                    ivPhone.setRotation(-rawSensorValue*9);
-                }
 
-            });
 
-        }
-        if(bluetoothConnectionThread != null){
+    if(sensorThread!=null)
 
-            tConnected.post(new Runnable() {
+    {
 
-                @Override
-                public void run() {
+        final float rawSensorValue = sensorThread.getRaw();
 
-                    if(bluetoothConnectionThread.isBluetoothConnectionWorking()){
-                        tConnected.setText("CONNECTED");
-                        tConnected.setTextColor(Color.GREEN);
-                    }else{
-                        tConnected.setText("NOT CONNECTED");
-                        tConnected.setTextColor(Color.RED);
-                    }
 
+                ivPhone.setRotation(-rawSensorValue * 9);
+            }
+
+
+
+
+    if(bluetoothConnectionThread!=null)
+
+    {
+
+
+                if (bluetoothConnectionThread.isBluetoothConnectionWorking()) {
+                    tConnected.setText("CONNECTED");
+                    tConnected.setTextColor(Color.GREEN);
+                } else {
+                    tConnected.setText("NOT CONNECTED");
+                    tConnected.setTextColor(Color.RED);
                 }
 
-            });
+            }
 
-        }
+
+
     }
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
 
 
-        touchThread = new TouchThread( root, DPI, yGasStartDP );
+        touchThread = new TouchThread(root, DPI, yGasStartDP);
 
-        SensorManager manager = ( SensorManager ) getSystemService( SENSOR_SERVICE );
-        sensorThread = new SensorThread( manager, getApplicationContext( ) );
+        SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        sensorThread = new SensorThread(manager, getApplicationContext());
 
         bluetoothConnectionThread = new BluetoothConnectionThread(this);
 
-        if(!bluetoothConnectionThread.isAlive() ) {
-            bluetoothConnectionThread.start();
+        if (!bluetoothConnectionThread.isAlive()) {
+           bluetoothConnectionThread.start();
         }
 
-        CountDownTimer mainLoopTimer = new CountDownTimer(1000,1) {
+        CountDownTimer mainLoopTimer = new CountDownTimer(1000, 1) {
             @Override
             public void onTick(long millisUntilFinished) {
-                updateGraphics();
-                collectData();
+                mainLoop();
             }
 
             @Override
@@ -216,6 +210,12 @@ public class SaraMain extends Activity {
         //Wait until all threads are started before allowing bluetooth to send data.
         bluetoothConnectionThread.setSendAllowed(true);
 
+    }
+
+
+    private void mainLoop() {
+        updateGraphics();
+        collectData();
     }
 
     @Override
@@ -238,36 +238,36 @@ public class SaraMain extends Activity {
 
 
         super.onPause();
-       // super.onDestroy();
+        // super.onDestroy();
 
     }
 
 
     public void onConnectSelected() {
 
-            //TODO - snygga till knappen, antingen lägga till en till för disconnect eller ba slasha
+        //TODO - snygga till knappen, antingen lägga till en till för disconnect eller ba slasha
 
-            bluetoothConnectionThread.setSendAllowed(false);
+        bluetoothConnectionThread.setSendAllowed(false);
 
-            bluetoothConnectionThread.interrupt();
-            bluetoothConnectionThread.kill();
-            bluetoothConnectionThread = null;
+        bluetoothConnectionThread.interrupt();
+        bluetoothConnectionThread.kill();
+        bluetoothConnectionThread = null;
 
-            bluetoothConnectionThread = new BluetoothConnectionThread(this);
+        bluetoothConnectionThread = new BluetoothConnectionThread(this);
 
     }
 
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUESTCODE){
-            if(resultCode == RESULT_OK){
+        if (requestCode == REQUESTCODE) {
+            if (resultCode == RESULT_OK) {
 
                 //todo - skriva ut bluetooth i mobilen om vi har connection
 
                 Log.d(TAG, "ResultCode OK from bluetooth");
                 //bluetoothConnectionThread.bluetoothStartedOnPhone = true; //Not used at this time.
-            }else{
+            } else {
                 Toast.makeText(getApplicationContext(), "Bluetooth NOT actvated!", Toast.LENGTH_LONG).show();
             }
         }
@@ -275,18 +275,7 @@ public class SaraMain extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    private class UIRunnable implements Runnable{
-        @Override
-        public void run() {
-
-            while( !Thread.currentThread().isInterrupted() ) {
-                updateGraphics();
-
-            }
-        }
-    }
-
-    private void collectData(){
+    private void collectData() {
 
 
         if (sensorThread.getSensorValue() != steering) {
@@ -297,8 +286,8 @@ public class SaraMain extends Activity {
             int temp = (int) (114.24f - 0.38556f * touchThread.getThrottleValue());
 
 
-            if(temp >= 100) throttle = 100;
-            else if(temp <= 0) throttle = 0;
+            if (temp >= 100) throttle = 100;
+            else if (temp <= 0) throttle = 0;
             else throttle = (char) temp;
 
             bluetoothConnectionThread.write(THROTTLE, (byte) throttle);

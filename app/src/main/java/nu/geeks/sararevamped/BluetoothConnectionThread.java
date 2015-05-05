@@ -31,11 +31,14 @@ public class BluetoothConnectionThread extends Thread {
     private final InputStream inStream;
     private final OutputStream outStream;
     private boolean bluetoothConnectionWorking;
+    private String inputString;
 
     public boolean sendAllowed;
 
     public BluetoothConnectionThread(Activity activity) {
         this.activity = activity;
+
+        inputString = "null";
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
@@ -115,7 +118,26 @@ public class BluetoothConnectionThread extends Thread {
 
     @Override
     public void run() {
-        //TODO - read bluetooth?
+
+        byte[] buffer = new byte[256];
+        int bytes;
+
+        // Keep looping to listen for received messages
+        while (true) {
+            try {
+                bytes = inStream.read(buffer);            //read bytes from input buffer
+                String readMessage = new String(buffer, 0, bytes);
+                // Send the obtained bytes to the UI Activity via handler
+                inputString = readMessage;
+                Log.d(TAG, inputString);
+            } catch (IOException e) {
+                break;
+            }
+        }
+    }
+
+    public String getInput(){
+        return inputString;
     }
 
     public void kill(){

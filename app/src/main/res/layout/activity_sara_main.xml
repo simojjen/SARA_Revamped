@@ -71,6 +71,16 @@
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true"
             android:background="@android:drawable/ic_menu_manage" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="recieved"
+            android:id="@+id/tRecieved"
+            android:layout_alignBottom="@+id/bMenu"
+            android:layout_centerHorizontal="true"
+            android:textColor="#ffffff" />
     </RelativeLayout>
 
 </RelativeLayout>
