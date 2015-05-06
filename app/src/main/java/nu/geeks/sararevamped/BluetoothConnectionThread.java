@@ -133,7 +133,7 @@ public class BluetoothConnectionThread extends Thread {
 
                 inputString = readMessage;
 
-                Log.d(TAG, inputString);
+              //  Log.d(TAG, inputString);
             } catch (IOException e) {
                 Log.d(TAG, "breaked");
                 break;

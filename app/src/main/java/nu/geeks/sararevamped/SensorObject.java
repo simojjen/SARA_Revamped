@@ -9,14 +9,14 @@ import android.hardware.SensorManager;
 /**
  * Created by Simon on 4/28/2015.
  */
-public class SensorThread implements SensorEventListener{
+public class SensorObject implements SensorEventListener{
 
     private SensorManager manager;
     private Context context;
     private float rawValue;
     private char sendValue;
 
-    public SensorThread(SensorManager manager, Context context) {
+    public SensorObject(SensorManager manager, Context context) {
         this.manager = manager;
         this.context = context;
         sendValue = 0;

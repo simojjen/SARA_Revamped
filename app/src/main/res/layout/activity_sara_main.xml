@@ -94,7 +94,20 @@
             android:background="@drawable/visare"
             android:layout_marginLeft="220dp"
             android:layout_alignParentStart="true"
-            android:layout_marginTop="240dp" />
+            android:layout_marginTop="240dp"
+            />
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/seekSteering"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:max="100"
+            android:progress="50"
+            android:indeterminate="false"
+            android:layout_marginLeft="100dp"
+            android:layout_marginRight="100dp" />
 
     </RelativeLayout>
 

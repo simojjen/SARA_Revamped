@@ -7,7 +7,6 @@ import android.graphics.Typeface;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MenuInflater;
@@ -17,6 +16,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.RelativeLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,17 +30,19 @@ public class SaraMain extends Activity {
 
     private int DPI;
 
+    private int steeringCorrectionAmount = 0;
 
     private TouchThread touchThread;
-    private SensorThread sensorThread;
+    private SensorObject sensorObject;
     private BluetoothConnectionThread bluetoothConnectionThread;
 
     private Typeface font;
 
     private Button bMenu;
     private RelativeLayout root;
-    private ImageView ivPhone, ivGasPedal;
+    private ImageView ivPhone, ivGasPedal, ivVisare;
     private TextView debug, tConnected, tReceived;
+    private SeekBar steeringCorrection;
 
     private String debugText = "";
 
@@ -54,6 +56,7 @@ public class SaraMain extends Activity {
     private char honk;
     private char safeMode;
 
+    private boolean isSteeringCorrectionVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,12 @@ public class SaraMain extends Activity {
         tConnected = (TextView) findViewById(R.id.tConnected);
         bMenu = (Button) findViewById(R.id.bMenu);
         tReceived = (TextView) findViewById(R.id.tRecieved);
+        ivVisare = ( ImageView ) findViewById( R.id.imVisare );
+        steeringCorrection = ( SeekBar ) findViewById( R.id.seekSteering );
+
+        steeringCorrection.setVisibility(View.INVISIBLE);
+
+
 
         font = Typeface.createFromAsset(getAssets(), "dispfont.ttf");
         tReceived.setTypeface(font);
@@ -103,10 +112,36 @@ public class SaraMain extends Activity {
 
                         }
 
+                        if (item.getItemId() == R.id.action_calibrate) {
+
+                           isSteeringCorrectionVisible = !isSteeringCorrectionVisible;
+
+                            if(isSteeringCorrectionVisible) steeringCorrection.setVisibility(View.VISIBLE);
+                            else steeringCorrection.setVisibility(View.INVISIBLE);
+
+                        }
+
                         return false;
 
                     }
                 });
+            }
+        });
+
+        steeringCorrection.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                steeringCorrectionAmount = progress - 50;
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
             }
         });
     }
@@ -129,15 +164,20 @@ public class SaraMain extends Activity {
             float batteryStatus = 0;
 
             try {
-                batteryStatus = Float.parseFloat(sb.toString()) * 20.0f;
 
-                tReceived.setText(batteryStatus + " %");
+                batteryStatus = ((Float.parseFloat(sb.toString()) * 20.0f)-50)*2.0f;
+                int correctedValue = (int) batteryStatus;
+                if(batteryStatus >= 0) tReceived.setText(correctedValue + " %");
+                else tReceived.setText("0 %");
+
             }catch (NumberFormatException nb){
 
                       Log.d(TAG, "couldn't parse float.");
 
             }
+            float visarRotation = (batteryStatus * 2f) - 100;
 
+            ivVisare.setRotation(visarRotation);
 
         }
     }
@@ -171,11 +211,11 @@ public class SaraMain extends Activity {
 
 
 
-    if(sensorThread!=null)
+    if(sensorObject !=null)
 
     {
 
-        final float rawSensorValue = sensorThread.getRaw();
+        final float rawSensorValue = sensorObject.getRaw();
 
 
                 ivPhone.setRotation(-rawSensorValue * 9);
@@ -213,7 +253,7 @@ public class SaraMain extends Activity {
         touchThread = new TouchThread(root, DPI);
 
         SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        sensorThread = new SensorThread(manager, getApplicationContext());
+        sensorObject = new SensorObject(manager, getApplicationContext());
 
         restartBluetooth();
 
@@ -311,10 +351,16 @@ public class SaraMain extends Activity {
     private void collectData() {
 
 
-        if (sensorThread.getSensorValue() != steering) {
-            steering = sensorThread.getSensorValue();
+        if (sensorObject.getSensorValue() != steering) {
+
+            int steeringCalc = (int) sensorObject.getSensorValue() + steeringCorrectionAmount;
+
+            steering = (char) steeringCalc;
+            debugText = "" + (int) steering;
             bluetoothConnectionThread.write(STEERING, (byte) steering);
-        } else if (touchThread.getThrottleValue() != throttle) {
+
+        }
+        if (touchThread.getThrottleValue() != throttle) {
 
             int temp = (int) (114.24f - 0.38556f * touchThread.getThrottleValue());
 
@@ -324,7 +370,7 @@ public class SaraMain extends Activity {
             else throttle = (char) temp;
 
             bluetoothConnectionThread.write(THROTTLE, (byte) throttle);
-            debugText = "" + (int) throttle;
+            //debugText = "" + (int) throttle;
 
         }
     }
