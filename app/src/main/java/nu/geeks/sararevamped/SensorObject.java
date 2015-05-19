@@ -30,7 +30,7 @@ public class SensorObject implements SensorEventListener{
     public void onSensorChanged(SensorEvent event) {
         //this is math, dont question it
         rawValue = event.values[1];
-        float ut = rawValue*2f;
+        float ut = -rawValue*2f;
         sendValue = (char) (100-(ut*1.6f));
 
 

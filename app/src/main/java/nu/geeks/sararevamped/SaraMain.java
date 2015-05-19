@@ -20,6 +20,19 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+/* Programming by car:
+
+oö-7k,.......,nbvm
+,
+'_.,mb
+'vcx-ö.zl,<mk,,,,,z.-x*h-kjbvffbnm,
+m,.
+
+-i
+kaow29gjghbvcnj
+
+
+ */
 
 public class SaraMain extends Activity {
 
@@ -41,10 +54,11 @@ public class SaraMain extends Activity {
     private Button bMenu;
     private RelativeLayout root;
     private ImageView ivPhone, ivGasPedal, ivVisare;
-    private TextView debug, tConnected, tReceived;
+    private TextView debug, tConnected, tReceived,debug2;
     private SeekBar steeringCorrection;
 
     private String debugText = "";
+    private String debugText2 = "";
 
     private final int REQUESTCODE = 1234;
 
@@ -73,6 +87,7 @@ public class SaraMain extends Activity {
         tReceived = (TextView) findViewById(R.id.tRecieved);
         ivVisare = ( ImageView ) findViewById( R.id.imVisare );
         steeringCorrection = ( SeekBar ) findViewById( R.id.seekSteering );
+        debug2 = (TextView ) findViewById(R.id.tdebug2);
 
         steeringCorrection.setVisibility(View.INVISIBLE);
 
@@ -178,11 +193,14 @@ public class SaraMain extends Activity {
             float visarRotation = (batteryStatus * 2f) - 100;
 
             ivVisare.setRotation(visarRotation);
+            debugText2 = sb.toString();
 
         }
     }
 
     private void updateGraphics() {
+
+
         if (touchThread != null) {
 
             float val = touchThread.getThrottleValue();
@@ -191,17 +209,9 @@ public class SaraMain extends Activity {
 
 
             debug.setText("" + debugText);
+            debug2.setText("" + debugText2);
             ivGasPedal.setY(px);
 
-
-
-            if (bluetoothConnectionThread.isBluetoothConnectionWorking()) {
-                tConnected.setText("Connected");
-                tConnected.setTextColor(Color.GREEN);
-            } else {
-                tConnected.setText("Not connected");
-                tConnected.setTextColor(Color.RED);
-            }
         }
 
 
@@ -257,7 +267,7 @@ public class SaraMain extends Activity {
 
         restartBluetooth();
 
-        CountDownTimer mainLoopTimer = new CountDownTimer(1000, 1) {
+        CountDownTimer mainLoopTimer = new CountDownTimer(1000, 5) {
             @Override
             public void onTick(long millisUntilFinished) {
                 mainLoop();
@@ -356,7 +366,7 @@ public class SaraMain extends Activity {
             int steeringCalc = (int) sensorObject.getSensorValue() + steeringCorrectionAmount;
 
             steering = (char) steeringCalc;
-            debugText = "" + (int) steering;
+          //  debugText2 = "" + (int) steering;
             bluetoothConnectionThread.write(STEERING, (byte) steering);
 
         }
@@ -370,7 +380,7 @@ public class SaraMain extends Activity {
             else throttle = (char) temp;
 
             bluetoothConnectionThread.write(THROTTLE, (byte) throttle);
-            //debugText = "" + (int) throttle;
+            debugText = "" + (int) throttle;
 
         }
     }
