@@ -182,7 +182,7 @@ public class BluetoothConnectionThread extends Thread {
         char dist = 0;
 
 
-        byte[] msgBuffer = {key, (byte) value};
+        byte[] msgBuffer = {(byte) 253, key, (byte) value, (byte) 254};
         boolean sent = true;
 
 
@@ -198,6 +198,12 @@ public class BluetoothConnectionThread extends Thread {
             } catch (IOException e) {
                 bluetoothConnectionWorking = false;
             }
+        }
+
+        try {
+            outStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

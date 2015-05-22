@@ -45,6 +45,8 @@ public class SaraMain extends Activity {
 
     private int steeringCorrectionAmount = 0;
 
+    private char lastSentThrottleData = 0, lastSentSteeringData = 0;
+
     private TouchThread touchThread;
     private SensorObject sensorObject;
     private BluetoothConnectionThread bluetoothConnectionThread;
@@ -62,15 +64,17 @@ public class SaraMain extends Activity {
 
     private final int REQUESTCODE = 1234;
 
-    private final byte STEERING = 2;
-    private final byte THROTTLE = 1;
+    private final byte STEERING = (byte) 200;
+    private final byte THROTTLE = (byte) 201;
+    private final byte STOPFUNCTION = (byte) 202;
 
     private char steering;
     private char throttle;
-    private char honk;
-    private char safeMode;
+
 
     private boolean isSteeringCorrectionVisible = false;
+    private boolean isStopFunctionActive = true;
+    private boolean lastSendStopFunctionData = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,8 +115,8 @@ public class SaraMain extends Activity {
         bMenu.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                PopupMenu popupMenu = new PopupMenu(getApplicationContext(), v);
-                MenuInflater inflater = popupMenu.getMenuInflater();
+                final PopupMenu popupMenu = new PopupMenu(getApplicationContext(), v);
+                final MenuInflater inflater = popupMenu.getMenuInflater();
                 inflater.inflate(R.menu.menu_sara_main, popupMenu.getMenu());
                 popupMenu.show();
 
@@ -124,6 +128,13 @@ public class SaraMain extends Activity {
                         if (item.getItemId() == R.id.action_settings) {
 
                             onConnectSelected();
+
+                        }
+
+                        if( item.getItemId() == R.id.action_stop ){
+                           isStopFunctionActive = !isStopFunctionActive;
+                           if(!isStopFunctionActive) Toast.makeText(getApplicationContext(), "Auto stop function OFF", Toast.LENGTH_LONG).show();
+                           else Toast.makeText(getApplicationContext(), "Auto stop function ON", Toast.LENGTH_LONG).show();
 
                         }
 
@@ -267,7 +278,7 @@ public class SaraMain extends Activity {
 
         restartBluetooth();
 
-        CountDownTimer mainLoopTimer = new CountDownTimer(1000, 5) {
+        CountDownTimer mainLoopTimer = new CountDownTimer(5000, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
                 mainLoop();
@@ -345,9 +356,6 @@ public class SaraMain extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUESTCODE) {
             if (resultCode == RESULT_OK) {
-
-                //todo - skriva ut bluetooth i mobilen om vi har connection
-
                 Log.d(TAG, "ResultCode OK from bluetooth");
                 //bluetoothConnectionThread.bluetoothStartedOnPhone = true; //Not used at this time.
             } else {
@@ -367,9 +375,22 @@ public class SaraMain extends Activity {
 
             steering = (char) steeringCalc;
           //  debugText2 = "" + (int) steering;
-            bluetoothConnectionThread.write(STEERING, (byte) steering);
+            if(steering != lastSentSteeringData) {
+                bluetoothConnectionThread.write(STEERING, (byte) steering);
+            }
+            lastSentSteeringData = steering;
 
         }
+
+        //Only when stop functiondata is changed.
+        if(lastSendStopFunctionData != isStopFunctionActive){
+
+            if(isStopFunctionActive) bluetoothConnectionThread.write(STOPFUNCTION, (byte) 100);
+            else bluetoothConnectionThread.write(STOPFUNCTION, (byte) 101);
+            lastSendStopFunctionData = isStopFunctionActive;
+
+        }
+
         if (touchThread.getThrottleValue() != throttle) {
 
             int temp = (int) (114.24f - 0.38556f * touchThread.getThrottleValue());
@@ -378,8 +399,11 @@ public class SaraMain extends Activity {
             if (temp >= 100) throttle = 100;
             else if (temp <= 0) throttle = 0;
             else throttle = (char) temp;
+            //if(throttle != lastSentThrottleData) {
+                bluetoothConnectionThread.write(THROTTLE, (byte) throttle);
 
-            bluetoothConnectionThread.write(THROTTLE, (byte) throttle);
+            //}
+            //lastSentThrottleData = throttle;
             debugText = "" + (int) throttle;
 
         }
