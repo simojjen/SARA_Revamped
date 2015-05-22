@@ -176,6 +176,8 @@ public class SaraMain extends Activity {
         if(bluetoothConnectionThread.isBluetoothConnectionWorking()) {
            // Float readValue = (Float.parseFloat(bluetoothConnectionThread.getInput()) / 1023) * 5;
 
+            if(!bluetoothConnectionThread.isAlive()) bluetoothConnectionThread.start();
+
             String s = bluetoothConnectionThread.getInput();
             StringBuilder sb = new StringBuilder();
 
@@ -191,14 +193,14 @@ public class SaraMain extends Activity {
 
             try {
 
-                batteryStatus = ((Float.parseFloat(sb.toString()) * 20.0f)-50)*2.0f;
+                batteryStatus = (Float.parseFloat(sb.toString())-2.45f)*46.51f; //Math == magic
                 int correctedValue = (int) batteryStatus;
                 if(batteryStatus >= 0) tReceived.setText(correctedValue + " %");
                 else tReceived.setText("0 %");
 
             }catch (NumberFormatException nb){
-
-                      Log.d(TAG, "couldn't parse float.");
+                       //tReceived.setText("");
+                      //Log.d(TAG, "couldn't parse float.");
 
             }
             float visarRotation = (batteryStatus * 2f) - 100;
@@ -278,7 +280,7 @@ public class SaraMain extends Activity {
 
         restartBluetooth();
 
-        CountDownTimer mainLoopTimer = new CountDownTimer(5000, 10) {
+        CountDownTimer mainLoopTimer = new CountDownTimer(500, 10) {
             @Override
             public void onTick(long millisUntilFinished) {
                 mainLoop();
@@ -330,8 +332,6 @@ public class SaraMain extends Activity {
 
 
     public void onConnectSelected() {
-
-        //TODO - snygga till knappen, antingen lägga till en till för disconnect eller ba slasha
 
         restartBluetooth();
     }
