@@ -37,7 +37,7 @@ kaow29gjghbvcnj
 public class SaraMain extends Activity {
 
 
-    public static boolean DEBUG = true;
+    public static boolean DEBUG = false;
 
     private static final String TAG = "SaraMain::: ";
 
@@ -221,8 +221,8 @@ public class SaraMain extends Activity {
             final float px = (val - (25 * (DPI) / 160)) * (DPI / 160);
 
 
-            debug.setText("" + debugText);
-            debug2.setText("" + debugText2);
+            //debug.setText("" + debugText);
+            //debug2.setText("" + debugText2);
             ivGasPedal.setY(px);
 
         }

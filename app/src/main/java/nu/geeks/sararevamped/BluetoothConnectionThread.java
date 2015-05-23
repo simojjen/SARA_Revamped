@@ -42,7 +42,7 @@ public class BluetoothConnectionThread extends Thread {
 
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
-            //Todo - signal to user that bt is not supported by device
+            //Bluetooth is not supported by device.
         }
         if (!bluetoothAdapter.isEnabled()) {
             Intent bt = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -64,7 +64,7 @@ public class BluetoothConnectionThread extends Thread {
             }
         }
         if (!foundHC06) {
-            //TODO - user is not paired with HC-06
+            //suser is not paired with HC-06
             inStream = null;
             outStream = null;
 
@@ -104,8 +104,6 @@ public class BluetoothConnectionThread extends Thread {
             outStream = tmpOut;
             sendAllowed = true;
         }
-
-        //TODO - constructor
     }
 
     public void setSendAllowed(boolean sendAllowed){
