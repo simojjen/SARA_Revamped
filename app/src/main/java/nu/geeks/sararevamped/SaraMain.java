@@ -1,6 +1,7 @@
 package nu.geeks.sararevamped;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -61,6 +62,12 @@ public class SaraMain extends Activity {
 
     private String debugText = "";
     private String debugText2 = "";
+
+    private String infoMessage = "" +
+            "Applikationen SARA Revamped, samt den tillhörande bilen SARA,\n" +
+            "är utvecklad av Hannes Paulsson, Mikael André, Simon Johansson och Ramón Rodriguez" +
+            "under kursen Projekt och Projektmetoder (II1302) 2015 på KTH.\n" +
+            "Läs mer om oss och vad vi håller på med nu på www.geeks.nu";
 
     private final int REQUESTCODE = 1234;
 
@@ -145,6 +152,15 @@ public class SaraMain extends Activity {
                             if(isSteeringCorrectionVisible) steeringCorrection.setVisibility(View.VISIBLE);
                             else steeringCorrection.setVisibility(View.INVISIBLE);
 
+                        }
+
+                        if (item.getItemId() == R.id.action_info) {
+
+                            new AlertDialog.Builder(SaraMain.this)
+                                    .setTitle("Information")
+                                    .setMessage(infoMessage)
+                                    .setPositiveButton("Ok",null)
+                                    .show();
                         }
 
                         return false;

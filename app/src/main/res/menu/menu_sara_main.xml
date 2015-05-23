@@ -11,4 +11,7 @@
     <item android:id="@+id/action_calibrate" android:title="Show/hide steering calibration"
         android:orderInCategory="100" android:showAsAction="never" />
 
+    <item android:id="@+id/action_info" android:title="Info"
+        android:orderInCategory="100" android:showAsAction="never" />
+
 </menu>
