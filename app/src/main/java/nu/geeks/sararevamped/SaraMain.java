@@ -65,7 +65,7 @@ public class SaraMain extends Activity {
 
     private String infoMessage = "" +
             "Applikationen SARA Revamped, samt den tillhörande bilen SARA,\n" +
-            "är utvecklad av Hannes Paulsson, Mikael André, Simon Johansson och Ramón Rodriguez" +
+            "är utvecklad av Hannes Paulsson, Mikael André, Simon Johansson och Ramón Rodriguez " +
             "under kursen Projekt och Projektmetoder (II1302) 2015 på KTH.\n" +
             "Läs mer om oss och vad vi håller på med nu på www.geeks.nu";
 
@@ -192,17 +192,26 @@ public class SaraMain extends Activity {
         if(bluetoothConnectionThread.isBluetoothConnectionWorking()) {
            // Float readValue = (Float.parseFloat(bluetoothConnectionThread.getInput()) / 1023) * 5;
 
-            if(!bluetoothConnectionThread.isAlive()) bluetoothConnectionThread.start();
+            if(!bluetoothConnectionThread.isAlive()){
+                Log.d(TAG, "Restarting bluetooththread");
+                bluetoothConnectionThread.start();
+            }
 
             String s = bluetoothConnectionThread.getInput();
             StringBuilder sb = new StringBuilder();
 
             boolean start = false;
+
             for(char c : s.toCharArray()){
                 if(c == '#') start = true;
                 if(start){
                     if(c == '@') break;
                     if(c != '#') sb.append(c);
+                }
+            }
+            if(sb.length() == 0 ){
+                for(char c : s.toCharArray()){
+                    if(c != '@') sb.append(c);
                 }
             }
             float batteryStatus = 0;
@@ -216,9 +225,10 @@ public class SaraMain extends Activity {
 
             }catch (NumberFormatException nb){
                        //tReceived.setText("");
-                      //Log.d(TAG, "couldn't parse float.");
+                      Log.d(TAG, "couldn't parse " + s + " SB is " + sb.toString());
 
             }
+
             float visarRotation = (batteryStatus * 2f) - 100;
 
             ivVisare.setRotation(visarRotation);

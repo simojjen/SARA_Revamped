@@ -40,6 +40,7 @@ public class BluetoothConnectionThread extends Thread {
 
         inputString = "null";
 
+
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (bluetoothAdapter == null) {
             //Bluetooth is not supported by device.
@@ -142,6 +143,7 @@ public class BluetoothConnectionThread extends Thread {
     public String getInput(){
         return inputString;
     }
+
 
     public void kill(){
         bluetoothConnectionWorking = false;
