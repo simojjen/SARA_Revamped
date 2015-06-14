@@ -10,7 +10,7 @@ import android.widget.TextView;
 /**
  * Created by Simon on 4/28/2015.
  */
-public class TouchThread {
+public class Touch {
 
     final int DPI;
     float pxHalfButtonSize;
@@ -21,7 +21,7 @@ public class TouchThread {
     float sendValue;
 
 
-    public TouchThread(RelativeLayout root, final int DPI){
+    public Touch(RelativeLayout root, final int DPI){
         this.root = root;
         this.DPI = DPI;
         pxHalfButtonSize = 50 * (DPI / 160);

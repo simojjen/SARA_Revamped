@@ -48,7 +48,7 @@ public class SaraMain extends Activity {
 
     private char lastSentThrottleData = 0, lastSentSteeringData = 0;
 
-    private TouchThread touchThread;
+    private Touch touch;
     private SensorObject sensorObject;
     private BluetoothConnectionThread bluetoothConnectionThread;
 
@@ -240,9 +240,9 @@ public class SaraMain extends Activity {
     private void updateGraphics() {
 
 
-        if (touchThread != null) {
+        if (touch != null) {
 
-            float val = touchThread.getThrottleValue();
+            float val = touch.getThrottleValue();
             final int throttleValue = (int) (114.24f - 0.38556f * val);
             final float px = (val - (25 * (DPI) / 160)) * (DPI / 160);
 
@@ -299,7 +299,7 @@ public class SaraMain extends Activity {
         super.onResume();
 
 
-        touchThread = new TouchThread(root, DPI);
+        touch = new Touch(root, DPI);
 
         SensorManager manager = (SensorManager) getSystemService(SENSOR_SERVICE);
         sensorObject = new SensorObject(manager, getApplicationContext());
@@ -417,9 +417,9 @@ public class SaraMain extends Activity {
 
         }
 
-        if (touchThread.getThrottleValue() != throttle) {
+        if (touch.getThrottleValue() != throttle) {
 
-            int temp = (int) (114.24f - 0.38556f * touchThread.getThrottleValue());
+            int temp = (int) (114.24f - 0.38556f * touch.getThrottleValue());
 
 
             if (temp >= 100) throttle = 100;
